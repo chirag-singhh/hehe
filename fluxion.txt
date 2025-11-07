@@ -1,0 +1,150 @@
+
+Wi‑Fi Security Assessment & Penetration Testing — Ethical Cheatsheet
+==================================================================
+
+Purpose
+-------
+This document explains lawful, ethical, and defensive approaches to assessing Wi‑Fi security. It describes the theory, assessment methodology, tool *categories* (high-level), test planning, safe lab practices, legal/authorization templates, reporting guidance, detection & mitigation, and recommended next steps. **It does not provide instructions for exploiting networks, circumventing protections, or performing attacks.**
+
+Legal & Ethical Notice
+----------------------
+- Unauthorized access to Wi‑Fi networks, interception of traffic, or bypassing Wi‑Fi protections is illegal in many jurisdictions.
+- I will not provide operational steps, exploit commands, or instructions that enable wrongdoing.
+- Use these methods only on networks you own or where you have explicit written authorization. Maintain clear scope, objectives, and written consent before testing.
+- If you're an IT professional, follow your organization’s policy, applicable laws, and industry standards (e.g., ISO 27001, NIST SP 800‑115).
+
+Key Concepts (Theory)
+---------------------
+1. Wi‑Fi security components
+   - Radio layer: 802.11 standards, channels, SSIDs, encryption (WEP/WPA/WPA2/WPA3).
+   - Authentication: PSK (pre‑shared key), 802.1X (RADIUS), EAP methods.
+   - Management frames & control frames: beacons, probes, deauthentication frames (used in some attacks but also legitimate management).
+   - Roaming & roaming decision-making, captive portals and guest VLANs.
+
+2. Threat model
+   - Casual attackers: passively sniff traffic, attempt weak password guessing, exploit misconfigurations.
+   - Opportunistic attackers: set up rogue APs/captive portals, man-in-the-middle (MITM) attacks against unencrypted traffic.
+   - Motivated attackers: targeted reconnaissance, credential harvesting, protocol-level attacks — require stronger countermeasures.
+
+3. Assessment goals
+   - Discover visibility and broadcasted services (SSIDs, hidden SSIDs, management anomalies).
+   - Evaluate authentication and encryption strength (e.g., weak PSKs vs 802.1X/enterprise authentication).
+   - Identify configuration mistakes (open guest networks, shared credentials, weak key management).
+   - Test resilience to common misconfigurations and detection/response capabilities of the network operations team.
+
+High-Level Tool Categories (non-actionable)
+-------------------------------------------
+- Passive discovery & auditing tools: enumerate SSIDs, measure signal strength, identify access point models and channel usage. (High‑level info only — no commands.)
+- Active assessment tools: used by security professionals in controlled environments to validate authentication, captive portal behavior, and rogue AP detection. Use only with permission.
+- Monitoring & detection tools: IDS/IPS, wireless intrusion prevention systems (WIPS), enterprise controllers with rogue AP detection, RADIUS logs, and SIEM integration.
+- Lab OSes and distributions: specialized live distributions (e.g., security-focused Linux distros) for research and testing in isolated labs. Use them in legal, consented contexts only.
+
+Assessment Methodology (Ethical, Structured)
+--------------------------------------------
+Follow a structured methodology similar to NIST SP 800‑115 / OWASP testing framework adapted for wireless:
+
+1. Scoping & Rules of Engagement (ROE)
+   - Define systems in scope: SSIDs, AP MACs, controllers, client devices, guest networks, VLANs.
+   - Define allowed activities and excluded techniques (e.g., whether active disruption is allowed).
+   - Define time windows for testing, risk acceptance (possible impact to services), and point-of-contact for immediate stoppage.
+   - Obtain written authorization signed by an authorized representative (template included below).
+
+2. Reconnaissance (passive & non-disruptive)
+   - Record visible SSIDs, channel usage, signal coverage mapping, and device counts.
+   - Collect metadata: AP vendor (from beacon frames), encryption type advertised (WEP/WPA/WPA2/WPA3), and whether management protections (802.11w) are in use.
+   - Map physical coverage (wardriving in authorized areas) to identify unexpected APs or weak coverage that could allow external access.
+
+3. Configuration & Policy Review
+   - Review controller configurations: SSID settings, encryption settings, key rotation, guest network isolation, client isolation, 802.1X integration, and RADIUS server configs.
+   - Review WPA/WPA2/WPA3 settings and minimum cipher suites (disallow weak ciphers, disable WEP).
+   - Confirm secure management of APs (change default passwords, use management VLANs, secure SNMP, and secure controller access).
+
+4. Vulnerability Identification (non-destructive)
+   - Identify weak PSKs (passphrase policy issues), shared credentials, open guest networks, or misrouted management traffic.
+   - Check for outdated firmware and known CVEs for specific AP models (use vendor advisories and CVE databases) — do not attempt exploitative verification without express permission.
+   - Assess logging/visibility: RADIUS logs, AP logs, SIEM integration to ensure events are captured and alerted upon.
+
+5. Controlled Validation (only if explicitly authorized)
+   - With explicit consent and clear ROE, perform controlled, measured validation steps designed to demonstrate impact without disrupting service. Examples of allowed validation may include verifying that a weak PSK is accepted on a test SSID or showing that a misconfigured captive portal leaks credentials — only on test networks or with owner permission.
+   - Always coordinate with network operations to mitigate potential disruptions.
+
+6. Reporting & Remediation Guidance
+   - Produce an executive summary (risk-level, affected assets, recommended priorities).
+   - Technical findings with severity, reproduction steps limited to safe, non-exploitative descriptions, and suggested mitigations.
+   - Remediation examples: enforce WPA2‑Enterprise/WPA3‑Enterprise, strong passphrase policies, per-user credentials, enable management frame protections (802.11w), update firmware, enforce client isolation on guest SSIDs, implement WIPS, and enable robust logging and alerting.
+
+Safe Lab Practices & Learning Environment
+-----------------------------------------
+- Build an isolated wireless lab: separate SSID and APs not connected to production networks. Use VLANs or a physically separate router. Never test on production without explicit authorization.
+- Use virtual machines and simulated clients to validate detection and logging without involving real users.
+- Use vendor test devices or disposable hardware to avoid exposing personal devices.
+- Document all activity, timestamps, and scope to preserve auditability.
+
+Detection & Mitigation (Defensive Controls)
+-------------------------------------------
+- Use enterprise-grade controllers with rogue AP detection and centralized management.
+- Deploy Wireless Intrusion Prevention Systems (WIPS) to detect anomalous beaconing, unexpected SSIDs, and MAC spoofing attempts.
+- Enforce strong authentication: WPA2/WPA3‑Enterprise (802.1X) with per-user certificates or strong EAP methods (e.g., EAP‑TLS).
+- Implement network segmentation: guest SSIDs go to a restricted VLAN with firewall policies preventing lateral movement to internal resources.
+- Rotate PSKs and keys regularly; use unique PSKs per site or per device where appropriate.
+- Protect management traffic: use separate management VLAN, secure SNMP, SSH-only management, restrict controller access to admin networks, and use MFA for management portals.
+- Monitor for suspicious client behavior: unexpected DHCP requests, high ARP activity, or spikes in failed authentication attempts.
+
+Templates & Checklists (Reusable)
+--------------------------------
+
+A. Simple Authorization / Rules of Engagement template (sign before testing)
+--------------------------------------------------------------------------
+I, [Organization Name / Authorized Signatory], authorize [Tester Name / Company] to perform wireless security assessment on the following assets:
+- In‑scope SSIDs/APs: [list SSIDs or AP MACs]
+- Locations: [list physical locations]
+- Allowed activities: [e.g., passive scanning, configuration review, controlled validation steps]
+- Prohibited activities: [e.g., service disruption, deauthentication attacks, social engineering trainings without consent]
+- Testing window: [dates/times]
+- Point of contact: [name, phone, email]
+Signature: ____________________  Date: ___________
+
+B. Sample Findings Template (technical)
+--------------------------------------
+Finding ID: F‑001
+Title: Open/Guest SSID with insufficient isolation
+Severity: High / Medium / Low
+Description: Summary of the issue without operational exploit steps.
+Evidence: Beacon details, SSID name, AP model, timestamps (non-sensitive).
+Impact: Explanation of potential risks.
+Remediation: Concrete, defensive steps (e.g., enable guest VLAN, client isolation, firewall rules).
+References: Vendor docs, relevant standards (e.g., NIST, RFCs).
+
+C. Quick Pre-Test Checklist
+---------------------------
+- [ ] Written authorization/ROE signed.
+- [ ] Notify operations and schedule maintenance window if needed.
+- [ ] Backup configurations and have rollback plan.
+- [ ] Ensure lab/test APs are available for destructive/active validation.
+- [ ] Logging and monitoring enabled; point of contact on standby.
+
+Responsible Disclosure & Escalation
+----------------------------------
+- If testing discovers a critical vulnerability outside scope (e.g., upstream provider APs, neighboring networks), stop and escalate to legal/compliance and the asset owner. Do not publish sensitive details without coordinated disclosure.
+- For vendor vulnerabilities, coordinate with vendor disclosure programs or CVE processes and follow industry-standard timelines for reporting and patching.
+
+Resources & Learning (Non-Actionable)
+------------------------------------
+- Study wireless fundamentals (802.11 protocols, cryptography basics).
+- Learn defensive technologies: RADIUS, 802.1X, EAP methods, enterprise controller features, WIPS, and SIEM integration.
+- Certifications worth pursuing: CompTIA Security+, Certified Ethical Hacker (CEH) (note: some debate on CEH's value), Offensive Security Certified Professional (OSCP) for ethical penetration testing fundamentals (focuses on lab-based learning), SANS/GIAC courses for enterprise security.
+- Read vendor advisories and maintain firmware inventories for AP models in your environment.
+
+What I will NOT provide
+-----------------------
+- Step‑by‑step attack commands, exploit configurations, or instructions that enable unauthorized access to wireless networks.
+- Scripts, payloads, or operational playbooks for bypassing encryption, cracking passwords, or running deauthentication/rogue AP attacks against networks you do not own or control.
+
+Conclusion & Next Steps
+-----------------------
+If you want a downloadable `.txt` version of this ethical cheatsheet, I have created it for you. If you want additional non-actionable help, I can:
+- Convert this to PDF,
+- Add a custom scope-of-work template tailored to your organization,
+- Draft a remediation plan prioritizing high‑impact fixes,
+- Suggest a lab setup checklist with hardware recommendations for safe testing.
+Please confirm which of these you'd like next.

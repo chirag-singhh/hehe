@@ -1,0 +1,279 @@
+Network Scanning & Vulnerability Assessment — Detailed Guide (TXT)
+==================================================================
+
+Contents
+--------
+1. Overview
+2. Advanced IP Scanner
+3. Nmap — Network Mapper (detailed commands & examples)
+4. Zenmap — Nmap GUI (usage & examples)
+5. Nessus — Vulnerability Scanner (setup, scanning, reports)
+6. Typical Workflows (Discovery, Enumeration, Service Detection, Vulnerability Assessment)
+7. Practical Tips, Ethics & Legal Notes
+8. Appendix: Quick command reference
+
+1) OVERVIEW
+-----------
+This guide covers common network reconnaissance and vulnerability assessment tools: Advanced IP Scanner (Windows GUI), Nmap (CLI), Zenmap (Nmap GUI), and Nessus (vulnerability scanner). It explains what each tool does, detailed command examples, and how to use them for discovering active hosts, open ports, running services, and performing vulnerability assessments.
+
+Always obtain explicit authorization before scanning networks or systems you do not own. Unauthorized scanning may be illegal and could be considered hostile activity.
+
+2) ADVANCED IP SCANNER (Windows)
+--------------------------------
+What it is:
+- Advanced IP Scanner is a free Windows GUI tool for quickly scanning a local network to discover active hosts, share folders (SMB), RDP availability, and basic information like MAC addresses and manufacturers.
+
+Installation & Use:
+- Download from the official site and run the installer (or portable build).
+- Enter an IP range (e.g., 192.168.1.1-254 or 192.168.1.0/24) and click 'Scan'.
+- Results show live hosts, open RDP/SMB, MAC addresses, and the possibility to remotely connect via RDP, SSH, or remote desktop software.
+
+Typical Features:
+- Fast ping sweeps and multi-threaded scanning (LAN only).
+- Remote control integration (RDP, Radmin).
+- Export results to CSV for documentation.
+
+When to use:
+- Quick internal network discovery when you have a Windows desktop. Use it for asset inventory and initial host discovery before deeper scanning with Nmap or Nessus.
+
+3) NMAP — Network Mapper (CLI)
+-------------------------------
+What it is:
+- Nmap is a powerful open-source network scanner for host discovery, port scanning, service/version detection, OS fingerprinting, scriptable interaction with services (Nmap Scripting Engine - NSE), and more.
+
+Basic Syntax:
+nmap [options] <target(s)>
+Targets can be single IPs, CIDR ranges, hostnames, lists from files (-iL), or combinations.
+
+A) Host Discovery (Ping sweep)
+- Purpose: Find which hosts are up before port scanning.
+
+Examples:
+- Simple ping scan using ICMP echo (requires privileges for raw ICMP):
+  sudo nmap -sn 192.168.1.0/24
+  (formerly `-sP`; -sn = no port scan, host discovery only)
+
+- ARP ping (best for local Ethernet networks; faster and more reliable):
+  sudo nmap -sn -PR 192.168.1.0/24
+
+- TCP ping (if ICMP blocked):
+  sudo nmap -sn -PS22,80,443 192.168.1.0/24
+  (-PS: TCP SYN to listed ports)
+
+B) Port Scanning Types
+- TCP SYN scan (default when run as root; stealthy & fast):
+  sudo nmap -sS target.com
+- TCP Connect scan (uses OS connect system call; no raw sockets required):
+  nmap -sT target.com
+- UDP scan (slower, requires -sU; root privileges recommended):
+  sudo nmap -sU target.com
+- TCP ACK scan (firewall/ACL discovery):
+  sudo nmap -sA target.com
+- Xmas, FIN, NULL scans (stealth techniques - may be filtered):
+  sudo nmap -sX target.com
+  sudo nmap -sF target.com
+  sudo nmap -sN target.com
+
+C) Port Range and Specific Ports
+- Scan specific ports:
+  sudo nmap -p 22,80,443 target.com
+- Scan a range:
+  sudo nmap -p 1-65535 target.com
+
+D) Service & Version Detection
+- Detect service and version info:
+  sudo nmap -sV target.com
+- Aggressive version detection + default scripts + traceroute (see -A below):
+  sudo nmap -A target.com
+
+E) OS Detection
+- Attempt to determine OS fingerprint:
+  sudo nmap -O target.com
+- More aggressive: combine with version detection and scripts:
+  sudo nmap -A -O target.com
+
+F) Timing and Performance Templates
+- Use timing templates T0 (paranoid) to T5 (insane):
+  sudo nmap -T4 target.com
+- T4 is aggressive and good for LANs; T3 is default; T5 may trigger IDS.
+
+G) Output Formats
+- Normal output (to terminal): default
+- Save to grepable format (-oG):
+  sudo nmap -oG scan.gnmap target.com
+- Save to XML (-oX) for parsing/Zenmap, or to all three formats (-oA prefix):
+  sudo nmap -oX scan.xml target.com
+  sudo nmap -oA myscan target.com   # produces myscan.nmap, myscan.xml, myscan.gnmap
+- Save to a single text file (-oN):
+  sudo nmap -oN human_readable.txt target.com
+
+H) NSE — Nmap Scripting Engine (powerful automated checks)
+- List available scripts:
+  ls /usr/share/nmap/scripts
+- Run a specific script:
+  sudo nmap --script http-title target.com
+- Run categories of scripts (auth, vuln, discovery, safe, intrusive):
+  sudo nmap --script vuln target.com
+- Example: Use vulnerability scripts with version detection:
+  sudo nmap -sV --script vuln target.com
+
+I) Examples — Practical Scans
+1. Quick scan for common ports + service/version:
+   sudo nmap -sS -sV -p- --min-rate=1000 -T4 -oA fast_full_tcp target.com
+   Explanation: -p- scans all 65535 TCP ports; --min-rate sets packet send rate; use with care.
+
+2. Stealthy scan for specific ports and scripts:
+   sudo nmap -sS -p22,80,443 --script=banner,vuln target.com
+
+3. UDP + TCP comprehensive scan (slow):
+   sudo nmap -sS -sU -p T:1-65535,U:1-2000 -T3 -oA full_tcp_udp target.com
+   Note: UDP scans are very slow due to retransmissions and service behavior.
+
+4. Scan from list of targets and save XML for import:
+   sudo nmap -iL targets.txt -oX results.xml
+
+J) Advanced: Fragmentation, Decoys, Spoofing (use only in lab)
+- Fragment packets to evade simple IDS signature matching:
+  sudo nmap -f target.com
+- Use decoys to hide origin (may be illegal on networks you don't control):
+  sudo nmap -D RND:10 target.com  # 10 random decoys
+- Spoof source IP (requires raw sockets and may break connectivity):
+  sudo nmap -S 1.2.3.4 target.com
+
+K) NSE Examples (useful scripts)
+- ssl-enum-ciphers: enumerate TLS ciphers and weaknesses.
+  sudo nmap --script ssl-enum-ciphers -p 443 example.com
+- smb-enum-shares: enumerate SMB shares.
+  sudo nmap --script smb-enum-shares -p445 target.local
+- http-vuln-cve2017-5638 (example vulnerability script; only run with permission):
+  sudo nmap -p 8080 --script http-vuln-cve2017-5638 target.com
+
+4) ZENMAP — Nmap GUI
+--------------------
+What it is:
+- Zenmap is the official Nmap GUI. It provides profile-based scanning, saved scan results, and visualization (Topology, Host details). It translates GUI options into Nmap CLI commands, which helps learning Nmap flags.
+
+Installation:
+- Zenmap may be included with Nmap package on some OSs or available for download. On modern Linux distributions, Zenmap GUI may be deprecated; use the Nmap GUI alternatives or run Nmap and visualize via other tools.
+
+Key features & usage:
+- Predefined profiles: Quick scan, Intense scan, Intense scan plus UDP, etc.
+- Command field: shows the exact Nmap command line corresponding to profile/options you chose.
+- Results tab: parsed output of Nmap (host list, open ports, OS guesses, scripts output).
+- Topology tab: visual graph of hosts and networks discovered.
+- Saving and comparing scans: useful for tracking changes over time (regression/asset inventory).
+
+Example workflow in Zenmap:
+1. Enter target (192.168.1.0/24).
+2. Choose profile "Ping scan" to discover live hosts.
+3. Review results; select a host and run "Intense scan" to enumerate ports and services.
+4. Export results or view the generated Nmap command for reuse in CLI.
+
+5) NESSUS — Vulnerability Scanner
+---------------------------------
+What it is:
+- Nessus (by Tenable) is a popular vulnerability assessment scanner that identifies configuration issues, missing patches, known vulnerabilities (mapped to CVEs), weak passwords, and more. It uses plugins to perform checks and provides comprehensive reports and remediation guidance.
+
+Installation & Setup:
+- Download Nessus from Tenable's website (Nessus Essentials for free limited use, or Professional for paid features).
+- Install on a supported OS (Linux, Windows, macOS). Start the Nessus service and access the web UI (e.g., https://localhost:8834).
+- Register or activate with an activation code (Essentials/Professional). Create an admin user for the web UI.
+
+Creating a Scan:
+- In the web UI, create a new policy or use templates (Basic Network Scan, Credentialed Patch Audit, Web Application Tests, etc.).
+- Credentialed vs Uncredentialed scans:
+  - Credentialed scan: provide SSH/WinRM/SMB credentials for deeper checks (local package lists, registry, configuration). Much more accurate for patch/OS-level vulnerabilities.
+  - Uncredentialed scan: only network-level checks (open ports, service banners, remote exploits possible).
+
+Common Nessus Settings:
+- Targets: enter IP ranges, CIDR (192.168.1.0/24), or hostnames.
+- Port scanning options: allow Nessus to use Nmap or built-in port scanner.
+- Plugins: enable plugin families (Windows, Linux, Web Servers, Malware, Compliance checks).
+- Scan schedule: one-off or recurring scans.
+- Performance: tune port scan speed, parallel checks, and credentials.
+
+Interpreting Results:
+- Nessus reports list vulnerabilities with severity (Critical, High, Medium, Low, Informational), CVE IDs, plugin IDs, description, affected software, evidence, and remediation steps.
+- Use filters to focus on highest severity or exploitable issues first.
+- Export formats: PDF, CSV, HTML, Nessus (for import into other Tenable products).
+
+Example Nessus workflow:
+1. Create a credentialed policy for Linux servers (SSH key or username/password).
+2. Set target range and enable appropriate plugin families (Patch Checks, Local Checks).
+3. Run the scan and wait for completion.
+4. Review results: prioritize Critical/High; check evidence and impacted package versions.
+5. Remediate (patch/update, harden config) and re-scan to verify fixes.
+
+6) TYPICAL WORKFLOWS — Putting it all together
+---------------------------------------------
+A) Recon & Discovery (start safe, passive → active):
+1. Passive: use public sources (WHOIS, CT logs, DNS enumeration, Shodan, public registries) to find assets.
+2. Quick host discovery: ARP/ICMP ping sweep:
+   sudo nmap -sn -PR 192.168.1.0/24
+3. Quick port scan on live hosts:
+   sudo nmap -sS -F 192.168.1.0/24
+   (-F uses fast mode scanning fewer ports)
+
+B) Enumeration & Service Detection:
+1. Target interesting hosts and run service detection and versioning:
+   sudo nmap -sS -sV -p- -T4 target.ip -oA target_services
+2. Run NSE scripts for additional info (e.g., http-enum, smb-enum-shares):
+   sudo nmap -sV --script=http-enum,smb-enum-shares -p80,445 target.ip
+
+C) Vulnerability Assessment with Nessus:
+1. Run a credentialed Nessus scan for accurate patch detection.
+2. Review results and prioritize based on severity & exploitability.
+3. Export report and create remediation tickets (e.g., in JIRA) for patching & config fixes.
+4. Re-scan after remediation to verify.
+
+D) Reporting & Documentation:
+- Save Nmap outputs (-oA) and Nessus reports (PDF/CSV).
+- Document findings: host, open ports, services, CVEs, risk rating, remediation steps, and verification status.
+
+7) PRACTICAL TIPS & ETHICS
+--------------------------
+- Never scan targets without permission. For internal assessments, get written authorization and a scope definition.
+- Use credentialed vulnerability scans for accurate vulnerability detection; unauthenticated scans may generate false positives.
+- Use timing (-T) appropriately; aggressive scans may disrupt fragile systems or trigger IDS/IPS.
+- For large networks, segment scans over time to avoid flooding network links or services.
+- Store scan results securely — they contain sensitive security data.
+- Follow responsible disclosure if you find third-party vulnerabilities.
+
+8) APPENDIX: QUICK COMMAND REFERENCE
+-----------------------------------
+Host discovery:
+sudo nmap -sn 10.0.0.0/24
+sudo nmap -sn -PR 192.168.1.0/24
+
+Fast TCP scan (top ports):
+sudo nmap -sS -F target.com
+
+Full TCP port scan (all ports) + service detection:
+sudo nmap -sS -p- -sV -T4 -oA full_tcp target.com
+
+UDP scan (selected ports):
+sudo nmap -sU -p 53,67,123 target.com
+
+OS detection + version detection + default scripts + traceroute:
+sudo nmap -A target.com
+
+Run NSE vulnerability scripts:
+sudo nmap -sV --script vuln target.com
+
+Aggressive timing (LAN only):
+sudo nmap -T4 -p1-1000 target.com
+
+Save outputs:
+sudo nmap -oN out.txt -oX out.xml -oG out.gnmap target.com
+# or
+sudo nmap -oA output_prefix target.com
+
+Zenmap:
+- Use profiles for common scans (Intense Scan, Ping Scan, Quick Scan).
+- View the generated command in the CLI field to learn flags.
+
+Nessus (high-level):
+- Use web UI: create policy -> credentialed scan -> run -> review report -> export
+- Prefer credentialed scans for patch/compliance checks.
+
+END OF FILE

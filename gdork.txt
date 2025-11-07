@@ -1,0 +1,128 @@
+Google Dorking (Google Hacking) Cheat Sheet
+=============================================
+A collection of useful Google search operators and "dorks" for OSINT, research, and cybersecurity learning.
+Use ethically — do not use for unauthorized access or privacy violations.
+
+BASIC SEARCH OPERATORS
+----------------------
+""""  Exact match search
+OR / |  Either one of the terms
+-  Exclude a term
+*  Wildcard for any word
+()  Group multiple terms
+
+Examples:
+"duocortex platform"
+"duocortex" OR "medical learning"
+duocortex -quiz
+"best * website"
+(duocortex OR medlearn) AND platform
+
+SITE AND DOMAIN SPECIFIC SEARCHES
+--------------------------------
+site:    Search within a specific domain
+site:.edu  Search only educational domains
+site:.gov  Search only government websites
+
+Examples:
+site:duocortex.com
+site:.edu cybersecurity
+site:.gov "cybersecurity policy"
+site:.in "carbon footprint"
+
+FILE TYPE AND DOCUMENT SEARCHES
+-------------------------------
+filetype: or ext:  Search specific file types
+
+Examples:
+filetype:pdf "hospital management system"
+filetype:docx project report
+filetype:xlsx student data
+filetype:pptx AI presentation
+
+INFORMATION GATHERING / OSINT
+-----------------------------
+intitle:    Word in the page title
+allintitle: All words must be in the title
+inurl:      Word in the page URL
+allinurl:   All words must be in the URL
+intext:     Word in the body text
+allintext:  All given words must appear in the body
+
+Examples:
+intitle:"login page"
+allintitle: "index of" "admin"
+inurl:admin
+allinurl: admin login
+intext:"confidential"
+allintext:"database credentials"
+
+DIRECTORY AND INDEX SEARCHES
+----------------------------
+"index of /"   Find open directories
+"index of" + filetype  Locate specific file directories
+intitle:"index of"  List open server directories
+
+Examples:
+"index of /" "backup"
+"index of" "mp3"
+intitle:"index of" site:gov
+
+LOGIN PAGES, ADMIN PANELS, SENSITIVE DATA
+-----------------------------------------
+(Use responsibly — ethical testing only.)
+
+inurl:admin         Find admin login panels
+intitle:"login"     Login page titles
+inurl:wp-admin      WordPress admin panels
+"password" filetype:xls  Password leaks in Excel
+"confidential" filetype:pdf  Sensitive PDFs
+
+Examples:
+inurl:admin site:edu
+intitle:"login" site:gov
+inurl:wp-admin
+"password" filetype:xls
+"confidential" filetype:pdf
+
+DATABASE / CONFIG FILE EXPOSURE
+-------------------------------
+filetype:env   Exposed environment files
+filetype:sql   SQL dump files
+filetype:log   Log files
+filetype:bak   Backup files
+filetype:xml   Config or sitemap data
+
+Examples:
+filetype:env "DB_PASSWORD="
+filetype:sql "insert into"
+filetype:log error
+filetype:bak site:in
+filetype:xml site:duocortex.com
+
+COMBINING DORKS (ADVANCED SEARCH)
+---------------------------------
+Combine multiple operators for powerful searches:
+
+Examples:
+site:.edu filetype:pdf intitle:"exam paper" "cybersecurity"
+site:github.com "DB_PASSWORD" ext:env
+inurl:login OR inurl:admin site:gov.in
+
+OTHER USEFUL OPERATORS
+----------------------
+cache:     Show Google’s cached version
+related:   Show similar sites
+info:      Show information about a site
+define:    Get definitions
+link:      Show pages that link to a URL
+
+Examples:
+cache:duocortex.com
+related:duocortex.com
+info:duocortex.com
+define:encryption
+link:duocortex.com
+
+
+END OF CHEAT SHEET

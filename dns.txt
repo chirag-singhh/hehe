@@ -1,0 +1,86 @@
+DNS and Related Concepts — Explanation Cheat Sheet
+====================================================
+
+1) What is DNS?
+----------------
+DNS (Domain Name System) is the internet's phonebook. It translates human-friendly domain names (like example.com) into IP addresses (like 93.184.216.34) that computers use to route traffic. DNS is hierarchical and distributed: global root servers delegate to top-level domain (TLD) servers, which delegate to authoritative name servers that hold the actual records for a domain.
+Common DNS record types:
+- A: IPv4 address for a hostname.
+- AAAA: IPv6 address for a hostname.
+- CNAME: Canonical name — an alias pointing to another hostname.
+- MX: Mail exchange servers for a domain (used for email delivery).
+- NS: Name servers authoritative for the domain.
+- TXT: Arbitrary text; often used for SPF, DKIM, and domain verification.
+- PTR: Reverse mapping from IP address to hostname (used in reverse DNS).
+- SOA: Start of Authority — metadata about the DNS zone (serial number, TTL, admin email).
+
+2) DNS Enumeration — What and Why
+---------------------------------
+DNS enumeration is the process of discovering DNS records, subdomains, and other domain-related information. It is commonly used for:
+- Network reconnaissance during penetration testing (to map attack surface).
+- Defensive security and asset discovery (to find forgotten or shadow subdomains).
+- Troubleshooting and auditing DNS configurations.
+
+Techniques and methods used in DNS enumeration:
+- Zone transfers (AXFR): Asking an authoritative name server for the entire DNS zone. If misconfigured and allowed, this returns all records for a domain — a major information leak.
+- Brute-force / wordlist subdomain enumeration: Trying many likely subdomain names (e.g., admin.example.com, dev.example.com) and resolving them to find valid hosts.
+- Dictionary and permutation checks: Generating likely subdomain permutations (appending numbers, hyphens, etc.)
+- Certificate transparency logs: Searching public CT logs to find hostnames included in SSL/TLS certificates.
+- Search engines and public datasets (e.g., passive DNS): Using historical, aggregated DNS data to find previously observed subdomains and records.
+- DNS record probing: Querying for specific record types (MX, TXT, SRV, etc.) to get more info about mail servers, services, or verifications.
+
+Important: Always have authorization for active enumeration against targets you don't own. Passive discovery (public CT logs, search engines) is safer for third-party research.
+
+3) Reverse IP Lookup (Reverse DNS)
+----------------------------------
+Reverse IP lookup is the process of finding domain names associated with an IP address. The DNS PTR record (pointer) maps an IP back to a hostname. For example, the PTR for 93.184.216.34 might resolve to example.com.
+Uses of reverse lookup:
+- Identifying which host a given IP belongs to.
+- Investigating shared hosting: multiple domains can share one IP; reverse lookups + passive datasets help discover co-hosted domains.
+- Email server verification: many mail servers expect a valid PTR record matching the sending host to reduce spam.
+Limitations:
+- PTR records are set on the IP owner's side (often the ISP or hosting provider), so they may be missing, generic, or misleading.
+- Reverse lookup might not reveal all domains hosted on the IP — it usually returns a single PTR entry (if any). To find multiple domains on the same IP you must use passive DNS databases, search engines, or specialized tools.
+
+4) ViewDNS — What it is and common features
+-------------------------------------------
+ViewDNS (viewdns.info) is a public web tool that provides a set of DNS and domain-related utilities for researchers and admins. Common features include:
+- DNS lookup: Query A, AAAA, MX, NS, TXT, and other records.
+- Reverse IP lookup: Show domains hosted on a particular IP (derived from public data and passive DNS).
+- DNS propagation checker: See how DNS records resolve from various locations around the world.
+- Zone transfer check: Test whether a domain's name servers allow AXFR (zone transfers).
+- Whois lookup, traceroute, ping, and more.
+Use cases: quick checks, passive reconnaissance, and troubleshooting DNS problems. Results are based on public and third-party data — treat them as informational, not authoritative.
+
+5) MXToolbox — What it is and common features
+---------------------------------------------
+MXToolbox (mxtoolbox.com) is a widely used online diagnostics suite focused on email and DNS. Notable features:
+- MX Lookup: Lists mail exchange (MX) records and priority for a domain.
+- SMTP diagnostics / SMTP test: Connects to mail servers to check SMTP banner, TLS, open relay status, and common configuration issues.
+- Blacklist check: Tests whether an IP or domain is listed on popular email blacklists (RBLs) that affect deliverability.
+- DNS lookup and monitoring: Query DNS records and set up alerts for changes or outages (paid service).
+- DNS propagation and troubleshooting tools (similar to ViewDNS).
+Use cases: troubleshooting email delivery, ensuring SPF/DKIM/DMARC are configured, diagnosing mail server issues, and monitoring DNS health for production systems.
+
+6) Practical tips and commands (CLI examples)
+--------------------------------------------
+- Basic DNS query (dig): dig example.com A or dig @8.8.8.8 example.com MX
+- Reverse lookup with dig: dig -x 93.184.216.34 +short
+- Check for zone transfer (don't run against third-party without permission): dig AXFR example.com @ns1.example.com
+- Check MX records: dig example.com MX +short
+- Use host for quick lookups: host example.com or host 93.184.216.34
+
+7) Ethics & Responsible Use
+---------------------------
+- Only perform active scans, zone transfers, or enumeration on systems you own or have explicit permission to test.
+- If you discover exposed credentials, sensitive data, or misconfigurations on someone else's assets, follow responsible disclosure policies (contact the owner, or use the vendor's bug bounty / security disclosure process).
+- Use public/passive sources (CT logs, search engines) for third-party reconnaissance when possible to avoid network stress or legal issues.
+
+8) Summary — When to use which tool
+-----------------------------------
+- Use DNS queries (dig/host) for authoritative, precise lookups.
+- Use reverse lookup to map IPs back to hostnames (PTR), but combine with passive sources to find all domains on an IP.
+- Use ViewDNS for quick, web-based checks and passive reverse-IP lists.
+- Use MXToolbox when diagnosing email delivery and MX-related issues, blacklist status, and SMTP health.
+
+END OF FILE
