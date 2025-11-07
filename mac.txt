@@ -1,0 +1,7 @@
+macchanger --help
+macchanger -s eth0 //to show
+macchanger -a eth0  // to change
+macchanger -r eth0 // random
+ipconfig ke andar etho 0 me mac address milega ether
+ke baju wala number
+macchanger -p eth0 //pehle jaisa
