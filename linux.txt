@@ -1,0 +1,203 @@
+50 Useful Linux Commands — Brief Description & Example
+
+1. ls
+   - List directory contents.
+   - Example: ls -la
+
+2. cd
+   - Change directory.
+   - Example: cd /home/user
+
+3. pwd
+   - Print working directory.
+   - Example: pwd
+
+4. mkdir
+   - Create directory.
+   - Example: mkdir new_folder
+
+5. rmdir
+   - Remove empty directory.
+   - Example: rmdir old_folder
+
+6. touch
+   - Create empty file or update timestamp.
+   - Example: touch file.txt
+
+7. cp
+   - Copy files or directories.
+   - Example: cp source.txt dest.txt
+
+8. mv
+   - Move or rename files/directories.
+   - Example: mv file.txt /tmp/
+
+9. rm
+   - Remove files or directories.
+   - Example: rm file.txt; rm -rf dir/
+
+10. find
+    - Search for files and perform actions.
+    - Example: find / -name "*.log"
+
+11. locate
+    - Fast file search using database.
+    - Example: locate passwd
+
+12. grep
+    - Search text using patterns.
+    - Example: grep -R "TODO" .
+
+13. sed
+    - Stream editor for text transformations.
+    - Example: sed 's/old/new/g' file.txt
+
+14. awk
+    - Text processing and reporting tool.
+    - Example: awk '{print $1}' file.txt
+
+15. cat
+    - Concatenate and display files.
+    - Example: cat file.txt
+
+16. less
+    - View file pager (back/forward navigation).
+    - Example: less /var/log/syslog
+
+17. head
+    - Show the first lines of a file.
+    - Example: head -n 20 file.log
+
+18. tail
+    - Show the last lines of a file (tail -f follows).
+    - Example: tail -f /var/log/syslog
+
+19. chmod
+    - Change file permissions.
+    - Example: chmod 755 script.sh
+
+20. chown
+    - Change file owner and group.
+    - Example: chown user:group file.txt
+
+21. ps
+    - Report process status.
+    - Example: ps aux | grep nginx
+
+22. top
+    - Dynamic process viewer.
+    - Example: top
+
+23. htop
+    - Interactive process viewer (if installed).
+    - Example: htop
+
+24. kill
+    - Send signal to a process (terminate).
+    - Example: kill -9 1234
+
+25. pkill
+    - Kill processes by name.
+    - Example: pkill firefox
+
+26. systemctl
+    - Manage systemd services.
+    - Example: sudo systemctl restart nginx
+
+27. service
+    - Start/stop services (SysV/init compatibility).
+    - Example: sudo service apache2 start
+
+28. journalctl
+    - Query the systemd journal logs.
+    - Example: journalctl -u ssh.service
+
+29. uname
+    - Display system information.
+    - Example: uname -a
+
+30. df
+    - Report filesystem disk space usage.
+    - Example: df -h
+
+31. du
+    - Estimate file or directory space usage.
+    - Example: du -sh /var/www
+
+32. free
+    - Show memory and swap usage.
+    - Example: free -h
+
+33. mount
+    - Mount a filesystem.
+    - Example: sudo mount /dev/sdb1 /mnt/usb
+
+34. umount
+    - Unmount filesystem.
+    - Example: sudo umount /mnt/usb
+
+35. ssh
+    - Secure shell remote login.
+    - Example: ssh user@host
+
+36. scp
+    - Securely copy files over SSH.
+    - Example: scp file.txt user@host:/tmp/
+
+37. rsync
+    - Fast file copy and synchronization.
+    - Example: rsync -avz src/ dest/
+
+38. tar
+    - Archive files (create/extract).
+    - Example: tar -czvf archive.tar.gz folder/
+
+39. gzip
+    - Compress files with gzip.
+    - Example: gzip file.txt
+
+40. gunzip
+    - Decompress .gz files.
+    - Example: gunzip file.txt.gz
+
+41. curl
+    - Transfer data from or to a server.
+    - Example: curl -I https://example.com
+
+42. wget
+    - Non-interactive network downloader.
+    - Example: wget https://example.com/file.zip
+
+43. nano
+    - Simple command-line text editor.
+    - Example: nano file.txt
+
+44. vim
+    - Powerful modal text editor.
+    - Example: vim file.txt
+
+45. echo
+    - Display a line of text.
+    - Example: echo "Hello World"
+
+46. history
+    - Show command history.
+    - Example: history | grep apt
+
+47. alias
+    - Create command shortcuts.
+    - Example: alias ll='ls -la'
+
+48. sudo
+    - Execute a command as another user (default root).
+    - Example: sudo apt update
+
+49. su
+    - Switch user or root shell.
+    - Example: su - username
+
+50. crontab
+    - Schedule recurring tasks (cron jobs).
+    - Example: crontab -e
+
+-- End of list --
